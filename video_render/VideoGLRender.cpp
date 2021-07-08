@@ -13,6 +13,9 @@
 #include "../video_filter/GPUImageTwoInputFilter.h"
 #include "../video_filter/GPUImageNormalBlendFilter.h"
 
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui.hpp>
+
 VideoGLRender* VideoGLRender::s_Instance = nullptr;
 std::mutex VideoGLRender::m_Mutex;
 
@@ -28,7 +31,8 @@ VideoGLRender::VideoGLRender(){
 
     m_GPUImageNormalBlendFilter = new GPUImageNormalBlendFilter();
     filterGroup->addFilter(m_GPUImageNormalBlendFilter);
-    filterGroup->addFilter(m_GPUImageTextRender);
+//    filterGroup->addFilter(new GPUImageSharpenFilter(0.2f));
+//    filterGroup->addFilter(m_GPUImageTextRender);
     m_GPUImageRenderer = new GPUImageRenderer(filterGroup);
 //    m_GPUImageRenderer = new GPUImageRenderer(new GPUImageRGBFilter(1.0, 1.0, 1.0));
 #endif
@@ -69,14 +73,23 @@ void VideoGLRender::RenderVideoFrame(RenderImage *pImage) {
         RenderImageUtil::allocRenderImage(&m_RenderImage);
     }
     RenderImageUtil::copyRenderImage(pImage, &m_RenderImage);
-//
+
     if (m_RenderImageSmall.width == 0 || m_RenderImageSmall.height == 0) {
+#define __USE_OPENCV_LOAD_IMAGE__
+#ifdef __USE_OPENCV_LOAD_IMAGE__
+        cv::Mat inputImage = cv::imread("/sdcard/Download/zuoyebang.png", -1);
+        memset(&m_RenderImageSmall, 0, sizeof(m_RenderImageSmall));
+        m_RenderImageSmall.format = IMAGE_FORMAT_RGBA;
+        m_RenderImageSmall.width = inputImage.cols;
+        m_RenderImageSmall.height = inputImage.rows;
+        RenderImageUtil::allocRenderImage(&m_RenderImageSmall);
+        memcpy(m_RenderImageSmall.planes[0], inputImage.data, inputImage.cols * inputImage.rows * 4);
+#else
         memset(&m_RenderImageSmall, 0, sizeof(m_RenderImageSmall));
         m_RenderImageSmall.format = IMAGE_FORMAT_RGBA;
         m_RenderImageSmall.width = pImage->width / 4;
         m_RenderImageSmall.height = pImage->height / 4;
         RenderImageUtil::allocRenderImage(&m_RenderImageSmall);
-
         for(int i = 0; i < m_RenderImageSmall.height; i++) {
             for (int j = 0; j < m_RenderImageSmall.width; j++) {
                 if(j < m_RenderImageSmall.width / 4 * 1) {
@@ -102,9 +115,9 @@ void VideoGLRender::RenderVideoFrame(RenderImage *pImage) {
                 }
             }
         }
+#endif
     }
     m_GPUImageRenderer->setRenderImage(&m_RenderImage);
-    m_GPUImageNormalBlendFilter->setTexSize(m_RenderImage.width, m_RenderImage.height);
     m_GPUImageNormalBlendFilter->setRenderImage(&m_RenderImageSmall);
 ////    RenderImageUtil::copyRenderImage(pImage, &m_RenderImage);
 //    for()
@@ -175,7 +188,6 @@ void VideoGLRender::OnSurfaceChanged(int width, int height) {
 
     glViewport(0, 0, width, height);
     m_GPUImageRenderer->onSurfaceChanged(width, height);
-    m_GPUImageTextRender->setViewPort(width, height);
 }
 
 void VideoGLRender::OnDrawFrame() {

@@ -22,11 +22,6 @@ public:
     GPUImageTwoInputFilter(const char *vertexShader, const char *fragmentShader);
     ~GPUImageTwoInputFilter();
     void setRotation(Rotation rotation, bool filpHorizontal, bool filpVertical);
-    void setTexSize(int width, int height) {
-        textureWidth = width;
-        textureHeight = height;
-    }
-
     void genTextures();
     void setRenderImage(RenderImage *image);
     void renderTexture(const float *cubeBuffer, const float *textureBuffer);
@@ -34,7 +29,7 @@ public:
 
     virtual void onInit();
     virtual void onDrawArraysPre();
-
+    virtual void onOutputSizeChanged(int width, int height);
     virtual void onDraw(int textureId, const float *cubeBuffer, const float *textureBuffer);
 
 private:
@@ -54,6 +49,8 @@ private:
     GLuint m_TextureIds[TEXTURE_NUM];
     GLuint m_VaoId = -1;
     GLuint m_VboIds[TEXTURE_NUM];
+    const float *m_CubeBuffer = nullptr;
+    const float *m_TextureBuffer = nullptr;
 
     int imageWidth = 0;
     int imageHeight = 0;

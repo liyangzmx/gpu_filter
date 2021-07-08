@@ -4,10 +4,6 @@
 
 #include "GPUImageTextFilter.h"
 #include "glm/vec2.hpp"
-#include <opencv2/opencv.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-
-static cv::Mat mat;
 
 //""
 //"attribute vec4 position;\n"
@@ -226,7 +222,7 @@ void GPUImageTextFilter::onDraw(int textureId, const float *cubeBuffer, const fl
     RenderText(m_String, -0.95f, -0.7f, 1.0f, glm::vec3(1.0, 1.0, 1.0), glm::vec2(m_ViewWidth, m_ViewHeight));
 }
 
-void GPUImageTextFilter::setViewPort(int width, int height) {
+void GPUImageTextFilter::onOutputSizeChanged(int width, int height) {
     m_ViewWidth = width;
     m_ViewHeight = height;
 }

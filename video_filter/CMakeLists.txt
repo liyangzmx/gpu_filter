@@ -20,14 +20,6 @@ add_subdirectory(freetype-2.10.0)
 #set(BUILD_PERF_TESTS OFF)
 #add_subdirectory(opencv-4.5.2)
 
-include_directories(${CMAKE_CURRENT_LIST_DIR}/opencv-4.5.2-sdk/include)
-add_library(opencv_java SHARED IMPORTED)
-set_target_properties(
-        opencv_java
-        PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_CURRENT_LIST_DIR}/opencv-4.5.2-sdk/libs/${ANDROID_ABI}/libopencv_java4.so
-)
-
 SET(GPUImage_SOURCE_FILES
         GLUtils.cpp
         TextureRotationUtil.cpp
@@ -49,5 +41,4 @@ add_library(GPUImage STATIC ${GPUImage_SOURCE_FILES})
 
 target_link_libraries(GPUImage
         freetype
-        opencv_java
         )

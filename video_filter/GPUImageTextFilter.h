@@ -28,9 +28,9 @@ public:
     void RenderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color, glm::vec2 viewport);
     void LoadFacesByASCII();
     void LoadFacesByUnicode(int *unicodeArr, int size);
-    virtual void onDraw(int textureId, const float *cubeBuffer, const float *textureBuffer);
-    void setViewPort(int width, int height);
 
+    virtual void onDraw(int textureId, const float *cubeBuffer, const float *textureBuffer);
+    virtual void onOutputSizeChanged(int width, int height);
     virtual void onInit();
 
     static const char *TEXT_VERTEX_SHADER;
