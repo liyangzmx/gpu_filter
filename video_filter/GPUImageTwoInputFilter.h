@@ -35,6 +35,7 @@ public:
 private:
 #define TEXTURE_NUM 3
 #define MATH_PI 3.1415926535897932384626433832802
+    float texture1CoordinatesBuffer[8] = { 0.0f };
     float texture2CoordinatesBuffer[8] = { 0.0f };
     GLuint filterSecondTextureCoordinateAttribute;
     GLuint filterInputTextureUniform2;
@@ -49,8 +50,6 @@ private:
     GLuint m_TextureIds[TEXTURE_NUM];
     GLuint m_VaoId = -1;
     GLuint m_VboIds[TEXTURE_NUM];
-    const float *m_CubeBuffer = nullptr;
-    const float *m_TextureBuffer = nullptr;
 
     int imageWidth = 0;
     int imageHeight = 0;

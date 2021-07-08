@@ -137,13 +137,15 @@ GPUImageFilterGroup::onDraw(int textureId, const float *cubeBuffer, const float 
         }
         if (i == 0) {
             filter->onDraw(previousTexture, cubeBuffer, textureBuffer);
-        } else if (i == size - 1) {
+        }
+//        else if (i == size - 1) {
+//            filter->onDraw(previousTexture, TextureRotationUtil::CUBE,
+//                           (size % 2 == 0) ? TextureRotationUtil::TEXTURE_ROTATED_180
+//                                           : TextureRotationUtil::TEXTURE_NO_ROTATION);
+//        }
+        else {
             filter->onDraw(previousTexture, TextureRotationUtil::CUBE,
-                           (size % 2 == 0) ? TextureRotationUtil::TEXTURE_ROTATED_180
-                                           : TextureRotationUtil::TEXTURE_NO_ROTATION);
-        } else {
-            filter->onDraw(previousTexture, TextureRotationUtil::CUBE,
-                           TextureRotationUtil::TEXTURE_NO_ROTATION);
+                           TextureRotationUtil::TEXTURE_ROTATED_180);
         }
         if (isNotLast) {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -156,12 +158,8 @@ void GPUImageFilterGroup::updateMergedFilters() {
     if (m_Filters.size() == 0) {
         return;
     }
-    if (m_MergedFilters.size() != 0) {
-//        for (auto filter : m_MergedFilters) {
-//            delete filter;
-//        }
+    if (m_MergedFilters.size() != 0)
         m_MergedFilters.clear();
-    }
 
     for (auto tmpFilter : m_Filters) {
         if (tmpFilter->isMIsGroupFilter()) {

@@ -4,39 +4,6 @@
 
 #include "TextureRotationUtil.h"
 
-//const float GPUImageRenderer::CUBE[] = {
-//        -1.0f, -1.0f,   // 1
-//        -1.0f, 1.0f,    // 0
-//        1.0f, -1.0f,    // 2
-//        1.0f, 1.0f,     // 3
-//};
-//
-//const float GPUImageRenderer::TEXTURE_NO_ROTATION[] = {
-//        0.0f,  1.0f,        // TexCoord 1
-//        0.0f,  0.0f,        // TexCoord 0
-//        1.0f,  1.0f,        // TexCoord 2
-//        1.0f,  0.0f,        // TexCoord 3
-//};
-//
-//const float GPUImageRenderer::TEXTURE_ROTATED_90[] = {
-//        1.0f, 1.0f,
-//        1.0f, 0.0f,
-//        0.0f, 1.0f,
-//        0.0f, 0.0f,
-//};
-//const float GPUImageRenderer::TEXTURE_ROTATED_180[] = {
-//        0.0f,  0.0f,        // TexCoord 0
-//        0.0f,  1.0f,        // TexCoord 1
-//        1.0f,  0.0f,        // TexCoord 3
-//        1.0f,  1.0f,        // TexCoord 2
-//};
-//const float GPUImageRenderer::TEXTURE_ROTATED_270[] = {
-//        0.0f, 0.0f,
-//        0.0f, 1.0f,
-//        1.0f, 0.0f,
-//        1.0f, 1.0f,
-//};
-
 const float TextureRotationUtil::TEXTURE_NO_ROTATION[] = {
         0.0f,  1.0f,        // TexCoord 1
         0.0f,  0.0f,        // TexCoord 0

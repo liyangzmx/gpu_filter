@@ -88,7 +88,7 @@ GPUImageTwoInputFilter::GPUImageTwoInputFilter(const char *fragmentShader) : GPU
 
 GPUImageTwoInputFilter::GPUImageTwoInputFilter(const char *vertexShader,
                                                const char *fragmentShader) : GPUImageFilter(vertexShader, fragmentShader) {
-    setRotation(NORMAL, false, true);
+    setRotation(NORMAL, false, false);
 }
 
 GPUImageTwoInputFilter::~GPUImageTwoInputFilter()  {
@@ -111,7 +111,7 @@ void GPUImageTwoInputFilter::onDrawArraysPre() {
     glBindTexture(GL_TEXTURE_2D, glTextureId);
     glUniform1i(filterInputTextureUniform2, 7);
 
-    glVertexAttribPointer(filterSecondTextureCoordinateAttribute, 2, GL_FLOAT, false, 0, m_TextureBuffer);
+    glVertexAttribPointer(filterSecondTextureCoordinateAttribute, 2, GL_FLOAT, false, 0, texture2CoordinatesBuffer);
 }
 
 void GPUImageTwoInputFilter::onInit() {
@@ -223,31 +223,11 @@ void GPUImageTwoInputFilter::renderTexture(const float *cubeBuffer, const float 
     glBindFramebuffer(GL_FRAMEBUFFER, glFrameBufferId);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); //禁用byte-alignment限制
-//    glEnable(GL_BLEND);
-//    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glEnableVertexAttribArray(m_AttribPositionObj);
-    float temp[8] = { 0.0f };
-    float tempTextureBuffer[8] = { 0.0f };
-    for(int i = 0; i < 8; i++) {
-        temp[i] = cubeBuffer[i] / 3.3;
-    }
-    for(int i = 0; i < 8; i++) {
-        if((i % 2) == 0) {
-            temp[i] = temp[i] - 0.77;
-        } else {
-            temp[i] = temp[i] + 0.8;
-        }
-    }
-    glVertexAttribPointer(m_AttribPositionObj, 2, GL_FLOAT, false, 8, temp);
+    glVertexAttribPointer(m_AttribPositionObj, 2, GL_FLOAT, false, 8, textureBuffer);
     glEnableVertexAttribArray(m_AttribTextureCoordinateObj);
-    for (int i = 0; i < 8; ++i) {
-        tempTextureBuffer[i] = textureBuffer[i];
-        if((i % 2) == 1) {
-            tempTextureBuffer[i] = TextureRotationUtil::flip(textureBuffer[i]);
-        }
-    }
-    glVertexAttribPointer(m_AttribTextureCoordinateObj, 2, GL_FLOAT, false, 8, tempTextureBuffer);
+    glVertexAttribPointer(m_AttribTextureCoordinateObj, 2, GL_FLOAT, false, 8, textureBuffer);
 
     for (int i = 0; i < TEXTURE_NUM; ++i) {
         glActiveTexture(GL_TEXTURE4 + i);
@@ -270,9 +250,15 @@ GPUImageTwoInputFilter::onDraw(int textureId, const float *cubeBuffer, const flo
     if(!m_ImageLoaded || !m_IsInitialized) {
         return ;
     }
-    m_CubeBuffer = cubeBuffer;
-    m_TextureBuffer = textureBuffer;
+    for (int i = 0; i < 8; ++i) {
+        if((i % 2) == 1) {
+            texture1CoordinatesBuffer[i] = TextureRotationUtil::flip(textureBuffer[i]);
+        } else {
+            texture1CoordinatesBuffer[i] = textureBuffer[i];
+        }
+    }
     renderTexture(cubeBuffer, textureBuffer);
+
     GPUImageFilter::onDraw(textureId, cubeBuffer, textureBuffer);
 }
 

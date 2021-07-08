@@ -23,16 +23,16 @@ VideoGLRender::VideoGLRender(){
     m_InitDone = false;
 #if 1
     GPUImageFilterGroup *filterGroup = new GPUImageFilterGroup();
-//    GPUImageFilterGroup *filterGroup2 = new GPUImageFilterGroup();
-
     m_GPUImageTextRender = new GPUImageTextFilter();
-//    filterGroup->addFilter(new GPUImageBilateralBlurFilter(2.0f));
-//    filterGroup->addFilter(new GPUImageGaussianBlurFilter(0.2f));
+    filterGroup->addFilter(new GPUImageRGBFilter(1.0f, 0.9f, 0.9f));
+    filterGroup->addFilter(new GPUImageRGBFilter(1.0f, 0.9f, 0.9f));
+    filterGroup->addFilter(new GPUImageRGBFilter(1.0f, 0.9f, 0.9f));
+    filterGroup->addFilter(new GPUImageGaussianBlurFilter(0.2f));
+    filterGroup->addFilter(new GPUImageSharpenFilter(0.2f));
 
     m_GPUImageNormalBlendFilter = new GPUImageNormalBlendFilter();
     filterGroup->addFilter(m_GPUImageNormalBlendFilter);
-//    filterGroup->addFilter(new GPUImageSharpenFilter(0.2f));
-//    filterGroup->addFilter(m_GPUImageTextRender);
+    filterGroup->addFilter(m_GPUImageTextRender);
     m_GPUImageRenderer = new GPUImageRenderer(filterGroup);
 //    m_GPUImageRenderer = new GPUImageRenderer(new GPUImageRGBFilter(1.0, 1.0, 1.0));
 #endif
@@ -77,7 +77,7 @@ void VideoGLRender::RenderVideoFrame(RenderImage *pImage) {
     if (m_RenderImageSmall.width == 0 || m_RenderImageSmall.height == 0) {
 #define __USE_OPENCV_LOAD_IMAGE__
 #ifdef __USE_OPENCV_LOAD_IMAGE__
-        cv::Mat inputImage = cv::imread("/sdcard/Download/zuoyebang.png", -1);
+        cv::Mat inputImage = cv::imread("/sdcard/Download/baidu.png", -1);
         memset(&m_RenderImageSmall, 0, sizeof(m_RenderImageSmall));
         m_RenderImageSmall.format = IMAGE_FORMAT_RGBA;
         m_RenderImageSmall.width = inputImage.cols;
@@ -119,9 +119,6 @@ void VideoGLRender::RenderVideoFrame(RenderImage *pImage) {
     }
     m_GPUImageRenderer->setRenderImage(&m_RenderImage);
     m_GPUImageNormalBlendFilter->setRenderImage(&m_RenderImageSmall);
-////    RenderImageUtil::copyRenderImage(pImage, &m_RenderImage);
-//    for()
-//    m_GPUImageNormalBlendFilter->setRenderImage(&m_RenderImageSmall);
 }
 
 void VideoGLRender::UnInit() {

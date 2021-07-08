@@ -2,6 +2,7 @@
 // Created by liyang on 21-6-25.
 //
 
+#include "TextureRotationUtil.h"
 #include "GPUImageFilter.h"
 
 const char *GPUImageFilter::NO_FILTER_VERTEX_SHADER = ""

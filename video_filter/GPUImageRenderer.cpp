@@ -8,6 +8,9 @@
 
 GPUImageRenderer::GPUImageRenderer(GPUImageFilter *filter) :
     glTextureId(NO_TEXTURE), imageWidth(0), imageHeight(0){
+    if(m_Filter != nullptr) {
+        delete m_Filter;
+    }
     if(filter != nullptr) {
         m_GPUImageInputFilter = new GPUImageInputFilter();
         GPUImageFilterGroup *filterGroup = new GPUImageFilterGroup();

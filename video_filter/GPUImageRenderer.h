@@ -47,7 +47,7 @@ private:
     void runOnDrawEnd(const std::function<void()> &T);
     void runAll(std::queue<std::function<void()>> &queue);
 
-    GPUImageFilter *m_Filter;
+    GPUImageFilter *m_Filter = nullptr;
     std::queue<std::function<void()>>	m_RunOnDraw;
     std::queue<std::function<void()>>	m_RunOnDrawEnd;
     std::mutex				m_Lock;
@@ -80,12 +80,6 @@ private:
             1.0f, 1.0f,     // 2
             1.0f, 0.0f,     // 3
     };
-
-    static const float CUBE[];
-    static const float TEXTURE_NO_ROTATION[];
-    static const float TEXTURE_ROTATED_90[];
-    static const float TEXTURE_ROTATED_180[];
-    static const float TEXTURE_ROTATED_270[];
     static float flip(const float i);
 
     glm::mat4 m_MVPMatrix;

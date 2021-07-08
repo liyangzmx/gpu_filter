@@ -2,6 +2,7 @@
 // Created by liyang on 21-7-5.
 //
 
+#include "TextureRotationUtil.h"
 #include "GPUImageInputFilter.h"
 
 const char GPUImageInputFilter::VERTEX_SHADER_STR[] =
