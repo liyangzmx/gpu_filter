@@ -76,6 +76,12 @@ private:
     GPUImageRenderer *m_GPUImageRenderer;
     GPUImageTextFilter *m_GPUImageTextRender;
     GPUImageNormalBlendFilter *m_GPUImageNormalBlendFilter;
+    float m_X = -1.0;
+    float m_Y = 0.0;
+    int m_XAngle = 0.0;
+    int m_YAngle = 0.0;
+    float m_XScale = 0.0;
+    float m_YScale = 0.0;
     int m_FrameNums = 0;
 
     int m_FrameIndex;

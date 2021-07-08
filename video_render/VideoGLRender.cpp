@@ -77,7 +77,7 @@ void VideoGLRender::RenderVideoFrame(RenderImage *pImage) {
     if (m_RenderImageSmall.width == 0 || m_RenderImageSmall.height == 0) {
 #define __USE_OPENCV_LOAD_IMAGE__
 #ifdef __USE_OPENCV_LOAD_IMAGE__
-        cv::Mat inputImage = cv::imread("/sdcard/Download/baidu.png", -1);
+        cv::Mat inputImage = cv::imread("/sdcard/Download/zuoyebang.png", -1);
         memset(&m_RenderImageSmall, 0, sizeof(m_RenderImageSmall));
         m_RenderImageSmall.format = IMAGE_FORMAT_RGBA;
         m_RenderImageSmall.width = inputImage.cols;
@@ -117,7 +117,12 @@ void VideoGLRender::RenderVideoFrame(RenderImage *pImage) {
         }
 #endif
     }
+    float scaleX = m_RenderImageSmall.width * 1.0f / m_RenderImage.width;
+    float scaleY = m_RenderImageSmall.height * 1.0f / m_RenderImage.width;
+    m_XAngle += 2;
+
     m_GPUImageRenderer->setRenderImage(&m_RenderImage);
+    m_GPUImageNormalBlendFilter->UpdateMVPMatrix( -0.8, -0.7, 0, m_XAngle, scaleX, scaleX);
     m_GPUImageNormalBlendFilter->setRenderImage(&m_RenderImageSmall);
 }
 

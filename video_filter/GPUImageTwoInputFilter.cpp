@@ -3,28 +3,31 @@
 //
 
 #include "GPUImageTwoInputFilter.h"
+#include "glm/vec3.hpp"
+#include "gtc/matrix_transform.hpp"
 
 const char GPUImageTwoInputFilter::VERTEX_SHADER[] = "attribute vec4 position;\n"
-                                                    "attribute vec4 inputTextureCoordinate;\n"
-                                                    "attribute vec4 inputTextureCoordinate2;\n"
-                                                    " \n"
-                                                    "varying vec2 textureCoordinate;\n"
-                                                    "varying vec2 textureCoordinate2;\n"
-                                                    " \n"
-                                                    "void main()\n"
-                                                    "{\n"
-                                                    "    gl_Position = position;\n"
-                                                    "    textureCoordinate = inputTextureCoordinate.xy;\n"
-                                                    "    textureCoordinate2 = inputTextureCoordinate2.xy;\n"
-                                                    "}";
+                                                     "attribute vec4 inputTextureCoordinate;\n"
+                                                     "attribute vec4 inputTextureCoordinate2;\n"
+                                                     " \n"
+                                                     "varying vec2 textureCoordinate;\n"
+                                                     "varying vec2 textureCoordinate2;\n"
+                                                     " \n"
+                                                     "void main()\n"
+                                                     "{\n"
+                                                     "    gl_Position = position;\n"
+                                                     "    textureCoordinate = inputTextureCoordinate.xy;\n"
+                                                     "    textureCoordinate2 = inputTextureCoordinate2.xy;\n"
+                                                     "}";
 
 const char GPUImageTwoInputFilter::VERTEX_SHADER_STR[] = "#version 300 es\n"
                                                          "layout(location = 0) in vec4 a_position;\n"
                                                          "layout(location = 1) in vec2 a_texCoord;\n"
+                                                         "uniform mat4 u_MVPMatrix;\n"
                                                          "out vec2 v_texCoord;\n"
                                                          "void main()\n"
                                                          "{\n"
-                                                         "    gl_Position = a_position;\n"
+                                                         "    gl_Position = u_MVPMatrix * a_position;\n"
                                                          "    v_texCoord = a_texCoord;\n"
                                                          "}";
 
@@ -84,15 +87,18 @@ const char GPUImageTwoInputFilter::FRAGMENT_SHADER_STR[] = "#version 300 es\n"
                                                            "    }\n"
                                                            "}";
 
-GPUImageTwoInputFilter::GPUImageTwoInputFilter(const char *fragmentShader) : GPUImageTwoInputFilter(VERTEX_SHADER, fragmentShader) {}
+GPUImageTwoInputFilter::GPUImageTwoInputFilter(const char *fragmentShader)
+        : GPUImageTwoInputFilter(VERTEX_SHADER, fragmentShader) {}
 
 GPUImageTwoInputFilter::GPUImageTwoInputFilter(const char *vertexShader,
-                                               const char *fragmentShader) : GPUImageFilter(vertexShader, fragmentShader) {
+                                               const char *fragmentShader) : GPUImageFilter(
+        vertexShader, fragmentShader) {
     setRotation(NORMAL, false, false);
+//    UpdateMVPMatrix(0.2, 0.2, 0, 0, 1.0f, 1.0f);
 }
 
-GPUImageTwoInputFilter::~GPUImageTwoInputFilter()  {
-    if(m_ProgramObj != GL_NONE) {
+GPUImageTwoInputFilter::~GPUImageTwoInputFilter() {
+    if (m_ProgramObj != GL_NONE) {
         glDeleteProgram(m_ProgramObj);
         glDeleteTextures(1, &glTextureId);
         glTextureId = 0xFFFFFFFF;
@@ -101,8 +107,10 @@ GPUImageTwoInputFilter::~GPUImageTwoInputFilter()  {
 }
 
 
-void GPUImageTwoInputFilter::setRotation(Rotation rotation, bool filpHorizontal, bool filpVertical) {
-    TextureRotationUtil::getRotation( texture2CoordinatesBuffer, rotation, filpHorizontal, filpVertical);
+void
+GPUImageTwoInputFilter::setRotation(Rotation rotation, bool filpHorizontal, bool filpVertical) {
+    TextureRotationUtil::getRotation(texture2CoordinatesBuffer, rotation, filpHorizontal,
+                                     filpVertical);
 }
 
 void GPUImageTwoInputFilter::onDrawArraysPre() {
@@ -111,7 +119,8 @@ void GPUImageTwoInputFilter::onDrawArraysPre() {
     glBindTexture(GL_TEXTURE_2D, glTextureId);
     glUniform1i(filterInputTextureUniform2, 7);
 
-    glVertexAttribPointer(filterSecondTextureCoordinateAttribute, 2, GL_FLOAT, false, 0, texture2CoordinatesBuffer);
+    glVertexAttribPointer(filterSecondTextureCoordinateAttribute, 2, GL_FLOAT, false, 0,
+                          texture2CoordinatesBuffer);
 }
 
 void GPUImageTwoInputFilter::onInit() {
@@ -120,8 +129,10 @@ void GPUImageTwoInputFilter::onInit() {
     m_UniformTexture = glGetUniformLocation(m_ProgramId, "inputImageTexture");
     m_AttribTextureCoordinate = glGetAttribLocation(m_ProgramId, "inputTextureCoordinate");
 
-    filterSecondTextureCoordinateAttribute = glGetAttribLocation(getProgram(), "inputTextureCoordinate2");
-    filterInputTextureUniform2 = glGetUniformLocation(getProgram(), "inputImageTexture2"); // This does assume a name of "inputImageTexture2" for second input texture in the fragment shader
+    filterSecondTextureCoordinateAttribute = glGetAttribLocation(getProgram(),
+                                                                 "inputTextureCoordinate2");
+    filterInputTextureUniform2 = glGetUniformLocation(getProgram(),
+                                                      "inputImageTexture2"); // This does assume a name of "inputImageTexture2" for second input texture in the fragment shader
     glEnableVertexAttribArray(filterSecondTextureCoordinateAttribute);
 
     genTextures();
@@ -129,10 +140,8 @@ void GPUImageTwoInputFilter::onInit() {
 }
 
 void GPUImageTwoInputFilter::genTextures() {
-//    UpdateMVPMatrix(0, 0, 1.0f, 1.0f);
     m_ProgramObj = GLUtils::CreateProgram(VERTEX_SHADER_STR, FRAGMENT_SHADER_STR);
-    if (!m_ProgramObj)
-    {
+    if (!m_ProgramObj) {
         return;
     }
 
@@ -142,7 +151,7 @@ void GPUImageTwoInputFilter::genTextures() {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     glGenTextures(TEXTURE_NUM, m_TextureIds);
-    for (int i = 0; i < TEXTURE_NUM ; ++i) {
+    for (int i = 0; i < TEXTURE_NUM; ++i) {
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, m_TextureIds[i]);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -162,7 +171,7 @@ void GPUImageTwoInputFilter::setRenderImage(RenderImage *image) {
     runOnDraw([this, image]() {
         genFBTextures(image);
 
-        switch(image->format) {
+        switch (image->format) {
             case IMAGE_FORMAT_RGBA:
                 glActiveTexture(GL_TEXTURE0);
                 glBindTexture(GL_TEXTURE_2D, m_TextureIds[0]);
@@ -219,8 +228,12 @@ void GPUImageTwoInputFilter::setRenderImage(RenderImage *image) {
 }
 
 void GPUImageTwoInputFilter::renderTexture(const float *cubeBuffer, const float *textureBuffer) {
-    glUseProgram (m_ProgramObj);
+    glUseProgram(m_ProgramObj);
     glBindFramebuffer(GL_FRAMEBUFFER, glFrameBufferId);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glClearColor(0, 0, 0, 1);
+    glDisable(GL_DEPTH_TEST);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); //禁用byte-alignment限制
 
@@ -228,7 +241,7 @@ void GPUImageTwoInputFilter::renderTexture(const float *cubeBuffer, const float 
     glVertexAttribPointer(m_AttribPositionObj, 2, GL_FLOAT, false, 8, textureBuffer);
     glEnableVertexAttribArray(m_AttribTextureCoordinateObj);
     glVertexAttribPointer(m_AttribTextureCoordinateObj, 2, GL_FLOAT, false, 8, textureBuffer);
-
+    GLUtils::setMat4(m_ProgramObj, "u_MVPMatrix", m_MVPMatrix);
     for (int i = 0; i < TEXTURE_NUM; ++i) {
         glActiveTexture(GL_TEXTURE4 + i);
         glBindTexture(GL_TEXTURE_2D, m_TextureIds[i]);
@@ -247,11 +260,12 @@ void GPUImageTwoInputFilter::renderTexture(const float *cubeBuffer, const float 
 void
 GPUImageTwoInputFilter::onDraw(int textureId, const float *cubeBuffer, const float *textureBuffer) {
     GPUImageFilter::runPendingOnDrawTasks();
-    if(!m_ImageLoaded || !m_IsInitialized) {
-        return ;
+
+    if (!m_ImageLoaded || !m_IsInitialized) {
+        return;
     }
     for (int i = 0; i < 8; ++i) {
-        if((i % 2) == 1) {
+        if ((i % 2) == 1) {
             texture1CoordinatesBuffer[i] = TextureRotationUtil::flip(textureBuffer[i]);
         } else {
             texture1CoordinatesBuffer[i] = textureBuffer[i];
@@ -262,7 +276,7 @@ GPUImageTwoInputFilter::onDraw(int textureId, const float *cubeBuffer, const flo
     GPUImageFilter::onDraw(textureId, cubeBuffer, textureBuffer);
 }
 
-void GPUImageTwoInputFilter::genFBTextures(RenderImage *image)  {
+void GPUImageTwoInputFilter::genFBTextures(RenderImage *image) {
     if (glTextureId == 0xFFFFFFFF) {
         glGenFramebuffers(1, &glFrameBufferId);
         glGenTextures(1, &glTextureId);
@@ -293,4 +307,37 @@ void GPUImageTwoInputFilter::onOutputSizeChanged(int width, int height) {
     GPUImageFilter::onOutputSizeChanged(width, height);
     textureWidth = width;
     textureHeight = height;
+}
+
+void GPUImageTwoInputFilter::UpdateMVPMatrix(float x, float y, int angleX, int angleY, float scaleX,
+                                             float scaleY) {
+    angleX = angleX % 360;
+    angleY = angleY % 360;
+
+    //转化为弧度角
+    float radiansX = static_cast<float>(MATH_PI / 180.0f * angleX);
+    float radiansY = static_cast<float>(MATH_PI / 180.0f * angleY);
+    // Projection matrix
+    glm::mat4 Projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.1f, 100.0f);
+    //video_filter.glm::mat4 Projection = video_filter.glm::frustum(-ratio, ratio, -1.0f, 1.0f, 4.0f, 100.0f);
+    //video_filter.glm::mat4 Projection = video_filter.glm::perspective(45.0f,ratio, 0.1f,100.f);
+
+    // View matrix
+    glm::mat4 View = glm::lookAt(
+            glm::vec3(0, 0, 4), // Camera is at (0,0,1), in World Space
+            glm::vec3(0, 0, 0), // and looks at the origin
+            glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
+    );
+
+    // Model matrix
+    glm::mat4 Model = glm::mat4(1.0f);
+    Model = glm::translate(Model, glm::vec3(x, y, 0.0f));
+    Model = glm::rotate(Model, radiansX, glm::vec3(1.0f, 0.0f, 0.0f));
+    Model = glm::rotate(Model, radiansY, glm::vec3(0.0f, 1.0f, 0.0f));
+    Model = glm::scale(Model, glm::vec3(scaleX, scaleY, 1.0f));
+    float fixX = imageWidth * 1.0f / textureWidth;
+    float fixY = imageHeight * 1.0f / textureHeight;
+    Model = glm::translate(Model, glm::vec3(-0.5, -0.5, 0.0f));
+
+    m_MVPMatrix = Projection * View * Model;
 }

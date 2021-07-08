@@ -12,6 +12,7 @@
 #include "GPUImageFilter.h"
 #include "TextureRotationUtil.h"
 #include "RenderImage.h"
+#include "glm/detail/type_mat.hpp"
 
 class GPUImageTwoInputFilter : public GPUImageFilter {
 public:
@@ -26,6 +27,7 @@ public:
     void setRenderImage(RenderImage *image);
     void renderTexture(const float *cubeBuffer, const float *textureBuffer);
     void genFBTextures(RenderImage *image);
+    void UpdateMVPMatrix(float x, float y, int angleX, int angleY, float scaleX, float scaleY);
 
     virtual void onInit();
     virtual void onDrawArraysPre();
