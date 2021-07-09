@@ -58,58 +58,39 @@ void PixelBuffer::setRenderer(GPUImageRenderer *renderer) {
     m_Renderer->onSurfaceChanged(m_Width, m_Height);
 }
 
-RenderImage *PixelBuffer::getRenderImage() {
+void PixelBuffer::getRenderImage(RenderImage *image) {
     if(m_Renderer == nullptr) {
         std::cout << "JMS: getBitmap: Renderer was not set." << std::endl;
-        return nullptr;
+        return ;
     }
     if(m_ThreadId != std::this_thread::get_id()) {
         std::cout << "JMS: PixelBuffer::getBitmap(): This thread does not own the OpenGL context." << std::endl;
-        return nullptr;
+        return ;
     }
 
     // Call the renderer draw routine (it seems that some filters do not
     // work if this is only called once)
     m_Renderer->onDrawFrame();
-
-    RenderImage *image = new RenderImage();
-    image->format = IMAGE_FORMAT_RGBA;
-    image->width = m_Width;
-    image->height = m_Height;
-
-    RenderImageUtil::allocRenderImage(image);
-    glReadPixels(0, 0, image->width, image->height, GL_RGBA, GL_UNSIGNED_BYTE, image->planes[0]);
-
-    return image;
-}
-
-int PixelBuffer::getRenderImageRGB(uint8_t *rgbData) {
-    if(m_Renderer == nullptr) {
-        std::cout << "JMS: getBitmap: Renderer was not set." << std::endl;
-        return -1;
-    }
-    if(m_ThreadId != std::this_thread::get_id()) {
-        std::cout << "JMS: PixelBuffer::getBitmap(): This thread does not own the OpenGL context." << std::endl;
-        return -1;
-    }
-
-    // Call the renderer draw routine (it seems that some filters do not
-    // work if this is only called once)
     m_Renderer->onDrawFrame();
-//    m_Renderer->onDrawFrame();
 
-    RenderImage *image = new RenderImage();
     image->format = IMAGE_FORMAT_RGBA;
     image->width = m_Width;
     image->height = m_Height;
-    image->linesize[0] = m_Width;
 
-    RenderImageUtil::allocRenderImage(image);
+    glReadPixels(0, 0, m_Width, m_Height, GL_RGBA, GL_UNSIGNED_BYTE, image->planes[0]);
+    int *pIntBuffer = (int *) image->planes[0];
 
-    glReadPixels(0, 0, image->width, image->height, GL_RGBA, GL_UNSIGNED_BYTE, &(image->planes[0]));
-    return 0;
+    int width = image->width;
+    int height = image->height;
+
+    for (int i = 0; i < height / 2; i++) {
+        for (int j = 0; j < width; j++) {
+            int temp = pIntBuffer[(height - i - 1) * width + j];
+            pIntBuffer[(height - i - 1) * width + j] = pIntBuffer[i * width + j];
+            pIntBuffer[i * width + j] = temp;
+        }
+    }
 }
-
 
 EGLConfig PixelBuffer::chooseConfig() {
     int attribList[] = {
@@ -142,9 +123,9 @@ int PixelBuffer::getConfigAttrib(EGLConfig config, int attrib) {
     return 0;
 }
 
-RenderImage *PixelBuffer::getRenderImageWithFilterApplied(RenderImage *image) {
+void PixelBuffer::getRenderImageWithFilterApplied(RenderImage *src, RenderImage *dst) {
     if(m_Renderer != nullptr) {
-        m_Renderer->setRenderImage(image);
+        m_Renderer->setRenderImage(src);
     }
-    return getRenderImage();
+    getRenderImage(dst);
 }

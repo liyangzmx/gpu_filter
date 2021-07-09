@@ -85,7 +85,6 @@ void GPUImageTextFilter::RenderText(std::string text, GLfloat x, GLfloat y, GLfl
     glUseProgram(m_TextProgramId);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); //禁用byte-alignment限制
     glEnable(GL_BLEND);
-    //glEnable(GL_CULL_FACE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glUniform3f(glGetUniformLocation(m_TextProgramId, "u_textColor"), color.x, color.y, color.z);
     glBindVertexArray(m_VaoId);

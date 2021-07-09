@@ -115,9 +115,9 @@ GPUImageTwoInputFilter::setRotation(Rotation rotation, bool filpHorizontal, bool
 
 void GPUImageTwoInputFilter::onDrawArraysPre() {
     glEnableVertexAttribArray(filterSecondTextureCoordinateAttribute);
-    glActiveTexture(GL_TEXTURE7);
+    glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_2D, glTextureId);
-    glUniform1i(filterInputTextureUniform2, 7);
+    glUniform1i(filterInputTextureUniform2, 4);
 
     glVertexAttribPointer(filterSecondTextureCoordinateAttribute, 2, GL_FLOAT, false, 0,
                           texture2CoordinatesBuffer);
@@ -231,14 +231,14 @@ void GPUImageTwoInputFilter::renderTexture(const float *cubeBuffer, const float 
     glUseProgram(m_ProgramObj);
     glBindFramebuffer(GL_FRAMEBUFFER, glFrameBufferId);
     glClear(GL_COLOR_BUFFER_BIT);
-    glClear(GL_DEPTH_BUFFER_BIT);
-    glClearColor(0, 0, 0, 1);
-    glDisable(GL_DEPTH_TEST);
+//    glClear(GL_DEPTH_BUFFER_BIT);
+//    glClearColor(0, 0, 0, 1);
+//    glDisable(GL_DEPTH_TEST);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); //禁用byte-alignment限制
 
     glEnableVertexAttribArray(m_AttribPositionObj);
-    glVertexAttribPointer(m_AttribPositionObj, 2, GL_FLOAT, false, 8, textureBuffer);
+    glVertexAttribPointer(m_AttribPositionObj, 2, GL_FLOAT, false, 8, cubeBuffer);
     glEnableVertexAttribArray(m_AttribTextureCoordinateObj);
     glVertexAttribPointer(m_AttribTextureCoordinateObj, 2, GL_FLOAT, false, 8, textureBuffer);
     GLUtils::setMat4(m_ProgramObj, "u_MVPMatrix", m_MVPMatrix);
@@ -264,15 +264,7 @@ GPUImageTwoInputFilter::onDraw(int textureId, const float *cubeBuffer, const flo
     if (!m_ImageLoaded || !m_IsInitialized) {
         return;
     }
-//    for (int i = 0; i < 8; ++i) {
-//        if ((i % 2) == 1) {
-//            texture1CoordinatesBuffer[i] = TextureRotationUtil::flip(textureBuffer[i]);
-//        } else {
-//            texture1CoordinatesBuffer[i] = textureBuffer[i];
-//        }
-//    }
-    renderTexture(cubeBuffer, texture1CoordinatesBuffer);
-
+    renderTexture(cubeBuffer, textureBuffer);
     GPUImageFilter::onDraw(textureId, cubeBuffer, textureBuffer);
 }
 
@@ -337,7 +329,7 @@ void GPUImageTwoInputFilter::UpdateMVPMatrix(float x, float y, int angleX, int a
     Model = glm::scale(Model, glm::vec3(scaleX, scaleY, 1.0f));
     float fixX = imageWidth * 1.0f / textureWidth;
     float fixY = imageHeight * 1.0f / textureHeight;
-    Model = glm::translate(Model, glm::vec3(-0.5, -0.5, 0.0f));
+//    Model = glm::translate(Model, glm::vec3(-0.5, -0.5, 0.0f));
 
     m_MVPMatrix = Projection * View * Model;
 }

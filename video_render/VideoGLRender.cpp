@@ -22,7 +22,7 @@ std::mutex VideoGLRender::m_Mutex;
 VideoGLRender::VideoGLRender(){
     m_InitDone = false;
 
-#define __USE_PIXEL_BUFFER__
+//#define __USE_PIXEL_BUFFER__
 #ifdef __USE_PIXEL_BUFFER__
     m_GPUImageRenderer = new GPUImageRenderer(nullptr);
 #else
@@ -43,6 +43,8 @@ VideoGLRender::VideoGLRender(){
 
 VideoGLRender::~VideoGLRender() {
     RenderImageUtil::freeRenderImage(&m_RenderImage);
+    RenderImageUtil::freeRenderImage(&m_RenderImageRGB);
+    RenderImageUtil::freeRenderImage(&m_RenderImageSmall);
     if(m_GPUImageRenderer != nullptr) {
         delete m_GPUImageRenderer;
         m_GPUImageRenderer = nullptr;
@@ -60,6 +62,13 @@ void VideoGLRender::Init(int width, int height, int *dstSize) {
     m_Height = height;
 }
 
+static inline double get_time() {
+    struct timeval t;
+    struct timezone tzp;
+    gettimeofday(&t, &tzp);
+    return t.tv_sec + t.tv_usec * 1e-6;
+}
+
 void VideoGLRender::RenderVideoFrame(RenderImage *pImage) {
     if(pImage == nullptr || pImage->planes[0] == nullptr)
         return;
@@ -71,6 +80,7 @@ void VideoGLRender::RenderVideoFrame(RenderImage *pImage) {
     sprintf(info, "Frame: (%d, %d) idd: %d ", pImage->width, pImage->height, m_FrameNums);
     std::string tmpStr = info;
 
+    double startTime = get_time();
 #ifdef __USE_PIXEL_BUFFER__
     if (m_RenderImage.width != pImage->width || m_RenderImage.height != pImage->height) {
         if (m_RenderImage.planes[0] != nullptr) {
@@ -82,9 +92,15 @@ void VideoGLRender::RenderVideoFrame(RenderImage *pImage) {
         m_RenderImage.height = pImage->height;
         RenderImageUtil::allocRenderImage(&m_RenderImage);
     }
+    if (m_RenderImageRGB.width == 0 || m_RenderImageRGB.height == 0) {
+        memset(&m_RenderImageRGB, 0, sizeof(m_RenderImageRGB));
+        m_RenderImageRGB.format = IMAGE_FORMAT_RGBA;
+        m_RenderImageRGB.width = pImage->width;
+        m_RenderImageRGB.height = pImage->height;
+        RenderImageUtil::allocRenderImage(&m_RenderImageRGB);
+    }
 
-    RenderImage *filterdImage = nullptr;
-    std::thread _thread([this, tmpStr, &pImage, &filterdImage](){
+    std::thread _thread([this, tmpStr, &pImage](){
         PixelBuffer pixelBuffer(pImage->width, pImage->height);
         GPUImageFilterGroup *filterGroup = new GPUImageFilterGroup();
         GPUImageTextFilter *textFilter = new GPUImageTextFilter();
@@ -93,36 +109,33 @@ void VideoGLRender::RenderVideoFrame(RenderImage *pImage) {
         filterGroup->addFilter(new GPUImageRGBFilter(0.9f, 1.0f, 1.0f));
         filterGroup->addFilter(new GPUImageGaussianBlurFilter(0.2f));
         filterGroup->addFilter(new GPUImageSharpenFilter(0.2f));
-
 #if 1
         GPUImageNormalBlendFilter *normalBlendFilter = new GPUImageNormalBlendFilter();
         filterGroup->addFilter(normalBlendFilter);
-//        filterGroup->addFilter(textFilter);
+        filterGroup->addFilter(textFilter);
 
-        cv::Mat inputImage = cv::imread("/sdcard/Download/baidu.png", -1);
         if (m_RenderImageSmall.width == 0 || m_RenderImageSmall.height == 0) {
+            cv::Mat inputImage = cv::imread("/sdcard/Download/baidu.png", -1);
             memset(&m_RenderImageSmall, 0, sizeof(m_RenderImageSmall));
             m_RenderImageSmall.format = IMAGE_FORMAT_RGBA;
             m_RenderImageSmall.width = inputImage.cols;
             m_RenderImageSmall.height = inputImage.rows;
             RenderImageUtil::allocRenderImage(&m_RenderImageSmall);
+            memcpy(m_RenderImageSmall.planes[0], inputImage.data,
+                   inputImage.cols * inputImage.rows * 4);
         }
-        memcpy(m_RenderImageSmall.planes[0], inputImage.data,
-               inputImage.cols * inputImage.rows * 4);
-
-        normalBlendFilter->UpdateMVPMatrix( 0, 0, 0, 0, 0.5, 0.5);
+        float scaleX = m_RenderImageSmall.width * 1.0f / m_RenderImage.width;
+        float scaleY = m_RenderImageSmall.height * 1.0f / m_RenderImage.width;
+        normalBlendFilter->UpdateMVPMatrix( -0.8, -0.9, 0, m_XAngle, scaleY, scaleY);
         normalBlendFilter->setRenderImage(&m_RenderImageSmall);
 #endif
         GPUImageRenderer *renderer = new GPUImageRenderer(filterGroup);
         pixelBuffer.setRenderer(renderer);
-        filterdImage = pixelBuffer.getRenderImageWithFilterApplied(pImage);
+        pixelBuffer.getRenderImageWithFilterApplied(pImage, &m_RenderImageRGB);
     });
     _thread.join();
 
-    RenderImageUtil::copyRenderImage(filterdImage, &m_RenderImage);
-    RenderImageUtil::freeRenderImage(filterdImage);
-    free(filterdImage);
-
+    RenderImageUtil::copyRenderImage(&m_RenderImageRGB, &m_RenderImage);
 #else
     if (m_RenderImage.width != pImage->width || m_RenderImage.height != pImage->height) {
         if (m_RenderImage.planes[0] != nullptr) {
@@ -157,7 +170,7 @@ void VideoGLRender::RenderVideoFrame(RenderImage *pImage) {
                     m_RenderImageSmall.planes[0][i * m_RenderImageSmall.width * 4 + j * 4] = 255;
                     m_RenderImageSmall.planes[0][i * m_RenderImageSmall.width * 4 + j * 4 + 1] = 0;
                     m_RenderImageSmall.planes[0][i * m_RenderImageSmall.width * 4 + j * 4 + 2] = 0;
-                    m_RenderImageSmall.planes[0][i * m_RenderImageSmall.width * 4 + j * 4 + 3] = 127;
+                    m_RenderImageSmall.planes[0][i * m_Rende -0.9rImageSmall.width * 4 + j * 4 + 3] = 127;
                 } else if(j < m_RenderImageSmall.width / 4 * 2) {
                     m_RenderImageSmall.planes[0][i * m_RenderImageSmall.width * 4 + j * 4] = 255;
                     m_RenderImageSmall.planes[0][i * m_RenderImageSmall.width * 4 + j * 4 + 1] = 255;
@@ -180,14 +193,17 @@ void VideoGLRender::RenderVideoFrame(RenderImage *pImage) {
     }
     float scaleX = m_RenderImageSmall.width * 1.0f / m_RenderImage.width;
     float scaleY = m_RenderImageSmall.height * 1.0f / m_RenderImage.width;
-    m_XAngle += 2;
 
-    m_GPUImageNormalBlendFilter->UpdateMVPMatrix( -0.8, -0.7, 0, m_XAngle, scaleX, scaleX);
+    m_GPUImageNormalBlendFilter->UpdateMVPMatrix( -0.8, -0.9, 0, m_XAngle, scaleY, scaleY);
     m_GPUImageNormalBlendFilter->setRenderImage(&m_RenderImageSmall);
     m_GPUImageTextRender->setMString(tmpStr);
 #endif
+    m_XAngle += 2;
 //    RenderImageUtil::dumpRenderImage(&m_RenderImage, "/sdcard/Download", "IMG");
     m_GPUImageRenderer->setRenderImage(&m_RenderImage);
+
+    double endTime = get_time();
+    std::cout << "JMS use: " << (endTime - startTime) << std::endl;
 }
 
 void VideoGLRender::UnInit() {

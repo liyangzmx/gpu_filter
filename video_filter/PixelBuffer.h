@@ -28,13 +28,11 @@ public:
 
     ~PixelBuffer();
     void setRenderer(GPUImageRenderer *renderer);
-    RenderImage *getRenderImage();
-    int getRenderImageRGB(uint8_t *rgbData);
+    void getRenderImage(RenderImage *dst);
     EGLConfig chooseConfig();
     void listConfig();
     int getConfigAttrib(EGLConfig config, int attrib);
-    RenderImage *getRenderImageWithFilterApplied(RenderImage *image);
-    int getRGBImageWithFilterApplied(unsigned char *data, int width, int height, unsigned char *outRgb);
+    void getRenderImageWithFilterApplied(RenderImage *src, RenderImage *dst);
 private:
     EGLDisplay eglDisplay;
     EGLConfig *eglConfigs;
