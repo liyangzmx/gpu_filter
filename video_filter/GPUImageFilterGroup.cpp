@@ -138,11 +138,10 @@ GPUImageFilterGroup::onDraw(int textureId, const float *cubeBuffer, const float 
         if (i == 0) {
             filter->onDraw(previousTexture, cubeBuffer, textureBuffer);
         }
-//        else if (i == size - 1) {
-//            filter->onDraw(previousTexture, TextureRotationUtil::CUBE,
-//                           (size % 2 == 0) ? TextureRotationUtil::TEXTURE_ROTATED_180
-//                                           : TextureRotationUtil::TEXTURE_NO_ROTATION);
-//        }
+        else if (i == size - 1) {
+            filter->onDraw(previousTexture, TextureRotationUtil::CUBE,
+                           TextureRotationUtil::TEXTURE_NO_ROTATION);
+        }
         else {
             filter->onDraw(previousTexture, TextureRotationUtil::CUBE,
                            TextureRotationUtil::TEXTURE_ROTATED_180);

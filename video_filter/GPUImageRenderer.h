@@ -37,7 +37,7 @@ public:
     void setRenderImage(RenderImage *image);
     void setTexture(GLuint texture);
     void setFilter(GPUImageFilter *filter);
-    void deleteImage();
+//    void deleteImage();
     void UpdateMVPMatrix(int angleX, int angleY, float scaleX, float scaleY);
 private:
     void adjustImageScaling();

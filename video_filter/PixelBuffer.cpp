@@ -80,9 +80,6 @@ RenderImage *PixelBuffer::getRenderImage() {
     RenderImageUtil::allocRenderImage(image);
     glReadPixels(0, 0, image->width, image->height, GL_RGBA, GL_UNSIGNED_BYTE, image->planes[0]);
 
-    m_Renderer->deleteImage();
-    m_Renderer->onDrawFrame();
-
     return image;
 }
 
@@ -99,8 +96,7 @@ int PixelBuffer::getRenderImageRGB(uint8_t *rgbData) {
     // Call the renderer draw routine (it seems that some filters do not
     // work if this is only called once)
     m_Renderer->onDrawFrame();
-    m_Renderer->deleteImage();
-    m_Renderer->onDrawFrame();
+//    m_Renderer->onDrawFrame();
 
     RenderImage *image = new RenderImage();
     image->format = IMAGE_FORMAT_RGBA;

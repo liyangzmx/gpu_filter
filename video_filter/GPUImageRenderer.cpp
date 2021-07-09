@@ -132,65 +132,7 @@ void GPUImageRenderer::adjustImageScaling() {
     float ratioWidth = 1.0f * imageWidthNew / outputWidth;
     float ratioHeight = 1.0f * imageHeightNew / outputHeight;
 
-    switch (rotation) {
-        case ROTATION_90:
-            for(int i = 0; i < 8; i++)
-                glTextureBuffer[i] = TextureRotationUtil::TEXTURE_ROTATED_90[i];
-            break;
-        case ROTATION_180:
-            for(int i = 0; i < 8; i++)
-                glTextureBuffer[i] = TextureRotationUtil::TEXTURE_ROTATED_180[i];
-            break;
-        case ROTATION_270:
-            for(int i = 0; i < 8; i++)
-                glTextureBuffer[i] = TextureRotationUtil::TEXTURE_ROTATED_270[i];
-            break;
-        case NORMAL:
-        default:
-            for(int i = 0; i < 8; i++)
-                glTextureBuffer[i] = TextureRotationUtil::TEXTURE_NO_ROTATION[i];
-            break;
-    }
-    if (scaleType == CENTER_CROP) {
-        float distHorizontal = (1 - 1.0 / ratioWidth) / 2;
-        float distVertical = (1 - 1.0 / ratioHeight) / 2;
-
-        for (int i = 0; i < 8; ++i) {
-            if((i % 2) == 0) {
-                glTextureBuffer[i] = glTextureBuffer[i] == 0.0f ? distHorizontal : 1.0f - distHorizontal;
-            } else {
-                glTextureBuffer[i] = glTextureBuffer[i] == 0.0f ? distVertical : 1.0f - distVertical;
-            }
-        }
-    }
-    for (int i = 0; i < 8; ++i) {
-        if((i % 2) == 0) {
-            glCubeBuffer[i] = TextureRotationUtil::CUBE[i] / ratioWidth;
-        } else {
-            glCubeBuffer[i] = TextureRotationUtil::CUBE[i] / ratioHeight;
-        }
-    }
-    if (flipHorizontal) {
-        for (int i = 0; i < 8; ++i) {
-            if((i % 2) == 0) {
-                glTextureBuffer[i] = flip(glTextureBuffer[i]);
-            }
-        }
-    }
-    if (flipVertical) {
-        for (int i = 0; i < 8; ++i) {
-            if((i % 2) == 1) {
-                glTextureBuffer[i] = flip(glTextureBuffer[i]);
-            }
-        }
-    }
-}
-
-float GPUImageRenderer::flip(const float i) {
-    if (i == 0.0f) {
-        return 1.0f;
-    }
-    return 0.0f;
+    TextureRotationUtil::getRotation(glTextureBuffer, NORMAL, false, false);
 }
 
 void GPUImageRenderer::onDrawFrame() {

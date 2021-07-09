@@ -264,14 +264,14 @@ GPUImageTwoInputFilter::onDraw(int textureId, const float *cubeBuffer, const flo
     if (!m_ImageLoaded || !m_IsInitialized) {
         return;
     }
-    for (int i = 0; i < 8; ++i) {
-        if ((i % 2) == 1) {
-            texture1CoordinatesBuffer[i] = TextureRotationUtil::flip(textureBuffer[i]);
-        } else {
-            texture1CoordinatesBuffer[i] = textureBuffer[i];
-        }
-    }
-    renderTexture(cubeBuffer, textureBuffer);
+//    for (int i = 0; i < 8; ++i) {
+//        if ((i % 2) == 1) {
+//            texture1CoordinatesBuffer[i] = TextureRotationUtil::flip(textureBuffer[i]);
+//        } else {
+//            texture1CoordinatesBuffer[i] = textureBuffer[i];
+//        }
+//    }
+    renderTexture(cubeBuffer, texture1CoordinatesBuffer);
 
     GPUImageFilter::onDraw(textureId, cubeBuffer, textureBuffer);
 }

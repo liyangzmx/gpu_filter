@@ -22,7 +22,7 @@ public:
 
     GPUImageInputFilter() : GPUImageFilter(VERTEX_SHADER_STR, FRAGMENT_SHADER_STR){}
     void setRenderImage(RenderImage *image);
-    void deleteImage();
+//    void deleteImage();
 
     virtual void onInit();
 
