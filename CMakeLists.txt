@@ -28,12 +28,37 @@ if(UNIX)
 find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(FREETYPE2 REQUIRED
-    IMPORTED_TARGET
-    freetype2
-)
+        IMPORTED_TARGET
+        freetype2
+        )
 
 target_link_libraries(GPUImage
         PkgConfig::FREETYPE2
+)
+
+pkg_check_modules(SDL2 REQUIRED
+        IMPORTED_TARGET
+        sdl2
+        )
+
+pkg_check_modules(LIBAV REQUIRED IMPORTED_TARGET
+        libavdevice
+        libavfilter
+        libavformat
+        libavcodec
+        libswresample
+        libswscale
+        libavutil
+        )
+
+add_executable(demo 
+        demo/ffplay.c
+        demo/cmdutils.c
+        )
+target_link_libraries(demo 
+        GPUImage
+        PkgConfig::SDL2
+        PkgConfig::LIBAV
         )
 
 endif(UNIX)
