@@ -1,6 +1,6 @@
 #include <stdio.h>
+#include <iostream>
 #include <string>
-#include "../../../../../../src/common/Utils.h"
 #include "GLUtils.h"
 #include <stdlib.h>
 #include <cstring>
@@ -8,7 +8,7 @@
 
 void GLUtils::getError() {
     int err = glGetError();
-    LogW("GL Err: %d\n", err);
+    std::cout << "GL Err: " << err << std::endl;
 }
 
 GLuint GLUtils::LoadShader(GLenum shaderType, const char *pSource)
@@ -31,7 +31,7 @@ GLuint GLUtils::LoadShader(GLenum shaderType, const char *pSource)
                 if (buf)
                 {
                     glGetShaderInfoLog(shader, infoLen, NULL, buf);
-                    LogW("GLUtils::LoadShader Could not compile shader %d:\n%s\n", shaderType, buf);
+                    std::cout << "GLUtils::LoadShader Could not compile shader " << shaderType << ": " << buf << std::endl;
                     free(buf);
                 }
                 glDeleteShader(shader);
@@ -81,7 +81,7 @@ GLuint GLUtils::CreateProgram(const char *pVertexShaderSource, const char *pFrag
                 if (buf)
                 {
                     glGetProgramInfoLog(program, bufLength, NULL, buf);
-                    LogW("GLUtils::CreateProgram Could not link program:\n%s\n", buf);
+                    std::cout << "GLUtils::CreateProgram Could not link program:" << buf << std:: endl;
                     free(buf);
                 }
             }
@@ -148,7 +148,7 @@ GLuint GLUtils::CreateProgram(const char *pVertexShaderSource, const char *pFrag
 
 void GLUtils::DeleteProgram(GLuint &program)
 {
-    LogW("GLUtils::DeleteProgram");
+    std::cout << "GLUtils::DeleteProgram" << std::endl;
     if (program)
     {
         glUseProgram(0);
@@ -161,7 +161,7 @@ void GLUtils::CheckGLError(const char *pGLOperation)
 {
     for (GLint error = glGetError(); error; error = glGetError())
     {
-        LogI("GLUtils::CheckGLError GL Operation %s() glError (0x%x)\n", pGLOperation, error);
+        std::cout << "GLUtils::CheckGLError GL Operation " << pGLOperation << "() glError (" << error << ")" << std::endl;
     }
 
 }

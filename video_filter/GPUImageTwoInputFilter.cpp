@@ -3,8 +3,8 @@
 //
 
 #include "GPUImageTwoInputFilter.h"
-#include "glm/vec3.hpp"
-#include "gtc/matrix_transform.hpp"
+#include <glm/vec3.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 const char GPUImageTwoInputFilter::VERTEX_SHADER[] = "attribute vec4 position;\n"
                                                      "attribute vec4 inputTextureCoordinate;\n"
