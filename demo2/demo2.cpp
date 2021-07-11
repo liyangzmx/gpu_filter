@@ -33,24 +33,23 @@
 #include "GPUImageNormalBlendFilter.h"
 
 int main(const int argc, const char *argv[]){
-    RenderImage m_RenderImage;
+    RenderImage image;
     cv::Mat inputImage = cv::imread("../test.png", 1);
     
-    memset(&m_RenderImage, 0, sizeof(m_RenderImage));
-    m_RenderImage.format = IMAGE_FORMAT_RGBA;
-    m_RenderImage.width = inputImage.cols;
-    m_RenderImage.height = inputImage.rows;
-    RenderImageUtil::allocRenderImage(&m_RenderImage);
-    // memcpy(m_RenderImage.planes[0], inputImage.data, inputImage.cols * inputImage.rows * 4);
+    memset(&image, 0, sizeof(image));
+    image.format = IMAGE_FORMAT_RGBA;
+    image.width = inputImage.cols;
+    image.height = inputImage.rows;
+    RenderImageUtil::allocRenderImage(&image);
+    // memcpy(image.planes[0], inputImage.data, inputImage.cols * inputImage.rows * 4);
     for(int i = 0; i < inputImage.rows; i++) {
         for(int j = 0; j < inputImage.cols; j++) {
-            m_RenderImage.planes[0][i * inputImage.cols * 4 + j * 4] = inputImage.data[i * inputImage.cols * 3 + j * 3 + 2];
-            m_RenderImage.planes[0][i * inputImage.cols * 4 + j * 4 + 1] = inputImage.data[i * inputImage.cols * 3 + j * 3 + 1];
-            m_RenderImage.planes[0][i * inputImage.cols * 4 + j * 4 + 2] = inputImage.data[i * inputImage.cols * 3 + j * 3 + 0];
-            m_RenderImage.planes[0][i * inputImage.cols * 4 + j * 4 + 3] = 255;
+            image.planes[0][i * inputImage.cols * 4 + j * 4] = inputImage.data[i * inputImage.cols * 3 + j * 3 + 2];
+            image.planes[0][i * inputImage.cols * 4 + j * 4 + 1] = inputImage.data[i * inputImage.cols * 3 + j * 3 + 1];
+            image.planes[0][i * inputImage.cols * 4 + j * 4 + 2] = inputImage.data[i * inputImage.cols * 3 + j * 3 + 0];
+            image.planes[0][i * inputImage.cols * 4 + j * 4 + 3] = 255;
         }
     }
-    RenderImageUtil::dumpRenderImage(&m_RenderImage, "/home/nickli/desktop", "IMG");
 
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
@@ -59,21 +58,17 @@ int main(const int argc, const char *argv[]){
     GLFWwindow *window = glfwCreateWindow(inputImage.cols / 2, inputImage.rows / 2, __FILE__, NULL, NULL);
     glfwMakeContextCurrent(window);
 
-    GPUImageRenderer *m_GPUImageRenderer;
-
+    GPUImageRenderer *renderer;
     GPUImageFilterGroup *filterGroup = new GPUImageFilterGroup();
-    // Add your filters
-    filterGroup->addFilter(new GPUImageRGBFilter(1.0f, 1.0f, 1.0f));
+    filterGroup->addFilter(new GPUImageRGBFilter(1.0f, 0.0f, 1.0f));
     filterGroup->addFilter(new GPUImageSharpenFilter(0.2f));
-    m_GPUImageRenderer = new GPUImageRenderer(filterGroup);
-
-
-    m_GPUImageRenderer->onSurfaceCreated();
-    m_GPUImageRenderer->onSurfaceChanged(m_RenderImage.width / 2, m_RenderImage.height / 2);
+    renderer = new GPUImageRenderer(filterGroup);
+    renderer->onSurfaceCreated();
+    renderer->onSurfaceChanged(image.width / 2, image.height / 2);
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
-        m_GPUImageRenderer->setRenderImage(&m_RenderImage);
-        m_GPUImageRenderer->onDrawFrame();
+        renderer->setRenderImage(&image);
+        renderer->onDrawFrame();
         glfwSwapBuffers(window);
     }
     glfwTerminate();
