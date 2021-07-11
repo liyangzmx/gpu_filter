@@ -33,7 +33,7 @@
 #include "GPUImageNormalBlendFilter.h"
 
 int main(const int argc, const char *argv[]){
-    RenderImage image;
+    RenderImage image, logo; int m_XAngle = 0, frameNums = 0;
     cv::Mat inputImage = cv::imread("../test.png", 1);
     
     memset(&image, 0, sizeof(image));
@@ -41,7 +41,6 @@ int main(const int argc, const char *argv[]){
     image.width = inputImage.cols;
     image.height = inputImage.rows;
     RenderImageUtil::allocRenderImage(&image);
-    // memcpy(image.planes[0], inputImage.data, inputImage.cols * inputImage.rows * 4);
     for(int i = 0; i < inputImage.rows; i++) {
         for(int j = 0; j < inputImage.cols; j++) {
             image.planes[0][i * inputImage.cols * 4 + j * 4] = inputImage.data[i * inputImage.cols * 3 + j * 3 + 2];
@@ -51,6 +50,14 @@ int main(const int argc, const char *argv[]){
         }
     }
 
+    cv::Mat smallImage = cv::imread("../baidu.png", -1);
+    memset(&logo, 0, sizeof(logo));
+    logo.format = IMAGE_FORMAT_RGBA;
+    logo.width = smallImage.cols;
+    logo.height = smallImage.rows;
+    RenderImageUtil::allocRenderImage(&logo);
+    memcpy(logo.planes[0], smallImage.data, smallImage.cols * smallImage.rows * 4);
+
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -58,16 +65,31 @@ int main(const int argc, const char *argv[]){
     GLFWwindow *window = glfwCreateWindow(inputImage.cols / 2, inputImage.rows / 2, __FILE__, NULL, NULL);
     glfwMakeContextCurrent(window);
 
+    float scaleX = logo.width * 1.0f / image.width;
+    float scaleY = logo.height * 1.0f / image.width;
+
     GPUImageRenderer *renderer;
     GPUImageFilterGroup *filterGroup = new GPUImageFilterGroup();
-    filterGroup->addFilter(new GPUImageRGBFilter(1.0f, 0.0f, 1.0f));
-    filterGroup->addFilter(new GPUImageSharpenFilter(0.2f));
+    filterGroup->addFilter(new GPUImageRGBFilter(1.0f, 1.0f, 1.0f));
+    filterGroup->addFilter(new GPUImageGaussianBlurFilter(1));
+    GPUImageNormalBlendFilter *blendFliter = new GPUImageNormalBlendFilter();
+    filterGroup->addFilter(blendFliter);
+    blendFliter->setRenderImage(&logo);
+    GPUImageTextFilter *textFilter = new GPUImageTextFilter();
+    filterGroup->addFilter(textFilter);
     renderer = new GPUImageRenderer(filterGroup);
+
     renderer->onSurfaceCreated();
     renderer->onSurfaceChanged(image.width / 2, image.height / 2);
+    renderer->setRenderImage(&image);
+    char info[256];
+    std::string tmpStr = "";
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
-        renderer->setRenderImage(&image);
+        m_XAngle += 2; frameNums++;
+        blendFliter->UpdateMVPMatrix( -0.8, -0.9, 0, m_XAngle, scaleY, scaleY);
+        sprintf(info, "Frame: (%d, %d) idd: %d ", image.width, image.height, frameNums);
+        textFilter->setMString(std::string(info));
         renderer->onDrawFrame();
         glfwSwapBuffers(window);
     }

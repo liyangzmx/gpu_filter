@@ -11,7 +11,7 @@
 
 #include <freetype/ftglyph.h>
 
-#define DEFAULT_OGL_ASSETS_DIR "/sdcard/Download"
+#define DEFAULT_OGL_ASSETS_DIR "../"
 
 struct Character {
     GLuint textureID;   // ID handle of the glyph texture

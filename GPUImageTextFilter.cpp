@@ -109,7 +109,7 @@ void GPUImageTextFilter::RenderText(std::string text, GLfloat x, GLfloat y, GLfl
         w /= viewport.x;
         h /= viewport.y;
 
-        std::cout << "TextRenderSample::RenderText [xpos,ypos,w,h]=[" << xpos << ", " << ypos << ", " << w << ", " << h << "]";
+        // std::cout << "TextRenderSample::RenderText [xpos,ypos,w,h]=[" << xpos << ", " << ypos << ", " << w << ", " << h << "]" << std::endl;
 
         // 当前字符的VBO
 //        GLfloat vertices[24] = {
